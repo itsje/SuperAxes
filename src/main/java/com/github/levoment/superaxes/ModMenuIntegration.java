@@ -46,6 +46,20 @@ public class ModMenuIntegration implements ModMenuApi {
                     .setSaveConsumer(newValue -> SuperAxesMod.range = newValue)
                     .build());
 
+            // Set an option for limiting the log radius search
+            general.addEntry(entryBuilder.startBooleanToggle(new TranslatableText("option.superaxes.limit_log_search"), SuperAxesMod.limitSearch)
+                    .setDefaultValue(false)
+                    .setTooltip(new TranslatableText("option.superaxes.limit_log_search.tooltip"))
+                    .setSaveConsumer(newValue -> SuperAxesMod.limitSearch = newValue)
+                    .build());
+
+            // Set an option for the log search radius
+            general.addEntry(entryBuilder.startIntField (new TranslatableText("option.superaxes.log_radius"), SuperAxesMod.logRadius)
+                    .setDefaultValue(8)
+                    .setTooltip(new TranslatableText("option.superaxes.log_radius.tooltip"))
+                    .setSaveConsumer(newValue -> SuperAxesMod.logRadius = newValue)
+                    .build());
+
             // Save config
             builder.setSavingRunnable(() -> {
                 // Create a Property
@@ -53,6 +67,8 @@ public class ModMenuIntegration implements ModMenuApi {
                 // Set the property
                 configProperties.setProperty("harvestLeaves", String.valueOf(SuperAxesMod.harvestLeaves));
                 configProperties.setProperty("range", String.valueOf(SuperAxesMod.range));
+                configProperties.setProperty("limitSearch", String.valueOf(SuperAxesMod.limitSearch));
+                configProperties.setProperty("logRadius", String.valueOf(SuperAxesMod.logRadius));
                 // Save the properties
                 SuperAxesMod.saveConfig(SuperAxesMod.configFile, configProperties);
             });

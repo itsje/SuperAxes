@@ -66,13 +66,27 @@ public class TreeChopper {
                     BlockPos newPosition = pos.add(x, y, z);
                     // Check if we don't want to harvest leaves
                     if (!SuperAxesMod.harvestLeaves) {
-                        // Check if the blockstate is not null, the block is not null, and if the block is a log coming from another log, should alleviate most leaf->2nd tree issues
-                        if (world.getBlockState(newPosition) != null && world.getBlockState(newPosition).getBlock() != null && ((world.getBlockState(newPosition).isIn(BlockTags.LOGS) && CurrentIsLog))) {
-                            // Check that the block was not previously added to the stack
-                            if (!verificationQueueOfBlocksToBreak.contains(newPosition)) {
-                                // Add the block to the verification queue of blocks to break and also add it to the queue of blocks to break to continue searching for blocks to break
-                                initialQueueOfBlocksToBreak.add(newPosition);
-                                verificationQueueOfBlocksToBreak.add(newPosition);
+                        if (SuperAxesMod.limitSearch) {
+                            if (Math.abs(newPosition.getX() - originalPosition.getX()) < SuperAxesMod.logRadius && Math.abs(newPosition.getZ() - newPosition.getZ()) < SuperAxesMod.logRadius) {
+                                // Check if the blockstate is not null, the block is not null, and if the block is a log coming from another log, should alleviate most leaf->2nd tree issues
+                                if (world.getBlockState(newPosition) != null && world.getBlockState(newPosition).getBlock() != null && ((world.getBlockState(newPosition).isIn(BlockTags.LOGS) && CurrentIsLog))) {
+                                    // Check that the block was not previously added to the stack
+                                    if (!verificationQueueOfBlocksToBreak.contains(newPosition)) {
+                                        // Add the block to the verification queue of blocks to break and also add it to the queue of blocks to break to continue searching for blocks to break
+                                        initialQueueOfBlocksToBreak.add(newPosition);
+                                        verificationQueueOfBlocksToBreak.add(newPosition);
+                                    }
+                                }
+                            }
+                        } else {
+                            // Check if the blockstate is not null, the block is not null, and if the block is a log coming from another log, should alleviate most leaf->2nd tree issues
+                            if (world.getBlockState(newPosition) != null && world.getBlockState(newPosition).getBlock() != null && ((world.getBlockState(newPosition).isIn(BlockTags.LOGS) && CurrentIsLog))) {
+                                // Check that the block was not previously added to the stack
+                                if (!verificationQueueOfBlocksToBreak.contains(newPosition)) {
+                                    // Add the block to the verification queue of blocks to break and also add it to the queue of blocks to break to continue searching for blocks to break
+                                    initialQueueOfBlocksToBreak.add(newPosition);
+                                    verificationQueueOfBlocksToBreak.add(newPosition);
+                                }
                             }
                         }
                     } else {
@@ -80,23 +94,48 @@ public class TreeChopper {
                         // Since we want to harvest leaves, let's add the leaves and the logs to search for
                         // Check if the block blockstate is not null and if the block is not null
                         if (world.getBlockState(newPosition) != null && world.getBlockState(newPosition).getBlock() != null) {
-                            // If it is a log add it to the list of logs to break
-                            if (world.getBlockState(newPosition).isIn(BlockTags.LOGS)) {
-                                if (!verificationQueueOfBlocksToBreak.contains(newPosition)) {
-                                    initialQueueOfBlocksToBreak.add(newPosition);
-                                    verificationQueueOfBlocksToBreak.add(newPosition);
+                            if (SuperAxesMod.limitSearch) {
+                                if (Math.abs(newPosition.getX() - originalPosition.getX()) < SuperAxesMod.logRadius && Math.abs(newPosition.getZ() - newPosition.getZ()) < SuperAxesMod.logRadius) {
+                                    // If it is a log add it to the list of logs to break
+                                    if (world.getBlockState(newPosition).isIn(BlockTags.LOGS)) {
+                                        if (!verificationQueueOfBlocksToBreak.contains(newPosition)) {
+                                            initialQueueOfBlocksToBreak.add(newPosition);
+                                            verificationQueueOfBlocksToBreak.add(newPosition);
+                                        }
+                                    }
+                                    // If it is a leave add it to the list of leaves to break
+                                    else if (world.getBlockState(newPosition).isIn(BlockTags.LEAVES)) {
+                                        // Check if we are within the configured range
+                                        if (Math.abs(newPosition.getX() - originalPosition.getX()) < SuperAxesMod.range && Math.abs(newPosition.getZ() - newPosition.getZ()) < SuperAxesMod.range) {
+                                            if (!verificationQueueOfLeavesToBreak.contains(newPosition)) {
+                                                verificationQueueOfLeavesToBreak.add(newPosition);
+                                                initialQueueOfLeavesToBreak.add(newPosition);
+                                            }
+                                        }
+                                    }
                                 }
-                            }
-                            // If it is a leave add it to the list of leaves to break
-                            else if (world.getBlockState(newPosition).isIn(BlockTags.LEAVES)) {
-                                // Check if we are within the configured range
-                                if (Math.abs(newPosition.getX() - originalPosition.getX()) < SuperAxesMod.range && Math.abs(newPosition.getZ() - newPosition.getZ()) < SuperAxesMod.range) {
-                                    if (!verificationQueueOfLeavesToBreak.contains(newPosition)) {
-                                        verificationQueueOfLeavesToBreak.add(newPosition);
-                                        initialQueueOfLeavesToBreak.add(newPosition);
+                            } else {
+                                // If it is a log add it to the list of logs to break
+                                if (world.getBlockState(newPosition).isIn(BlockTags.LOGS)) {
+                                    if (!verificationQueueOfBlocksToBreak.contains(newPosition)) {
+                                        initialQueueOfBlocksToBreak.add(newPosition);
+                                        verificationQueueOfBlocksToBreak.add(newPosition);
+                                    }
+                                }
+                                // If it is a leave add it to the list of leaves to break
+                                else if (world.getBlockState(newPosition).isIn(BlockTags.LEAVES)) {
+                                    // Check if we are within the configured range
+                                    if (Math.abs(newPosition.getX() - originalPosition.getX()) < SuperAxesMod.range && Math.abs(newPosition.getZ() - newPosition.getZ()) < SuperAxesMod.range) {
+                                        if (!verificationQueueOfLeavesToBreak.contains(newPosition)) {
+                                            verificationQueueOfLeavesToBreak.add(newPosition);
+                                            initialQueueOfLeavesToBreak.add(newPosition);
+                                        }
                                     }
                                 }
                             }
+
+
+
                         }
                     }
                 }

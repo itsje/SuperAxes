@@ -14,6 +14,10 @@
   "option.superaxes.harvest_leaves": "Harvest leaves",
   "option.superaxes.harvest_leaves.tooltip": "Default is §cNo§r. §aYes §rwill harvest the tree leaves.",
   "option.superaxes.range": "Leaves scanning range",
-  "option.superaxes.range.tooltip": "Default is 5. A greater range will scan a greater radius of leaves to harvest."
+  "option.superaxes.range.tooltip": "Default is 5. A greater range will scan a greater radius of leaves to harvest.",
+  "option.superaxes.limit_log_search": "Limit Log Search Radius",
+  "option.superaxes.limit_log_search.tooltip": "Default is §cNo§r. Use §aYes §rif it takes too long to harvest trees on modded biomes.",
+  "option.superaxes.log_radius": "Log search radius",
+  "option.superaxes.log_radius.tooltip": "Default is 8. A greater range will scan a greater radius of logs to harvest."
 }
 

@@ -13,6 +13,13 @@ group = project.maven_group
 minecraft {
 }
 
+allprojects {
+	repositories {
+		jcenter()
+		maven { url "https://jitpack.io" }
+	}
+}
+
 // Reproducible builds
 tasks.withType(AbstractArchiveTask) {
 	preserveFileTimestamps = false
