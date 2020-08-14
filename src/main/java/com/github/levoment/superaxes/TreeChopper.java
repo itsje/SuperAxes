@@ -67,7 +67,7 @@ public class TreeChopper {
                     // Check if we don't want to harvest leaves
                     if (!SuperAxesMod.harvestLeaves) {
                         if (SuperAxesMod.limitSearch) {
-                            if (Math.abs(newPosition.getX() - originalPosition.getX()) < SuperAxesMod.logRadius && Math.abs(newPosition.getZ() - newPosition.getZ()) < SuperAxesMod.logRadius) {
+                            if (Math.abs(newPosition.getX() - originalPosition.getX()) < SuperAxesMod.logRadius || Math.abs(newPosition.getZ() - newPosition.getZ()) < SuperAxesMod.logRadius) {
                                 // Check if the blockstate is not null, the block is not null, and if the block is a log coming from another log, should alleviate most leaf->2nd tree issues
                                 if (world.getBlockState(newPosition) != null && world.getBlockState(newPosition).getBlock() != null && ((world.getBlockState(newPosition).isIn(BlockTags.LOGS) && CurrentIsLog))) {
                                     // Check that the block was not previously added to the stack
@@ -95,7 +95,7 @@ public class TreeChopper {
                         // Check if the block blockstate is not null and if the block is not null
                         if (world.getBlockState(newPosition) != null && world.getBlockState(newPosition).getBlock() != null) {
                             if (SuperAxesMod.limitSearch) {
-                                if (Math.abs(newPosition.getX() - originalPosition.getX()) < SuperAxesMod.logRadius && Math.abs(newPosition.getZ() - newPosition.getZ()) < SuperAxesMod.logRadius) {
+                                if (Math.abs(newPosition.getX() - originalPosition.getX()) < SuperAxesMod.logRadius || Math.abs(newPosition.getZ() - newPosition.getZ()) < SuperAxesMod.logRadius) {
                                     // If it is a log add it to the list of logs to break
                                     if (world.getBlockState(newPosition).isIn(BlockTags.LOGS)) {
                                         if (!verificationQueueOfBlocksToBreak.contains(newPosition)) {
