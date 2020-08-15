@@ -33,13 +33,13 @@ public class SuperAxeItem extends AxeItem {
 
     // Constructor
     public SuperAxeItem(ToolMaterial material, Settings settings) {
-        super(material, ((SuperAxesMaterialGenerator)material).getAxeAttackDamage(), ((SuperAxesMaterialGenerator) material).getAxeAttackSpeed(), settings);
+        super(material, ((SuperAxesMaterialGenerator) material).getAxeAttackDamage(), ((SuperAxesMaterialGenerator) material).getAxeAttackSpeed(), settings);
     }
 
 
     @Override
     public boolean canMine(BlockState state, World world, BlockPos pos, PlayerEntity miner) {
-        if(!world.isClient()) {
+        if (!world.isClient()) {
             // Check if the player is sneaking. If Sneaking, mine as normal
             if (miner.isSneaking()) return super.canMine(state, world, pos, miner);
             // Check if the tool is effective on the block and check for the LOGS tag
@@ -47,16 +47,16 @@ public class SuperAxeItem extends AxeItem {
                 // Create an instance of TreeChopper
                 TreeChopper treeChopper = new TreeChopper();
                 // Create a new thread for chopping the tree
-                new Thread(() -> {treeChopper.cutTree(state, world, pos, miner, miner.getMainHandStack());}).start();
+                new Thread(() -> {
+                    treeChopper.cutTree(state, world, pos, miner, miner.getMainHandStack());
+                }).start();
             }
         }
         return true;
     }
 
-    public void mineLeaves(BlockState leafBlockState, ServerWorld serverWorld, BlockPos pos, PlayerEntity miner)
-    {
-        if (leafBlockState.isIn(BlockTags.LEAVES))
-        {
+    public void mineLeaves(BlockState leafBlockState, ServerWorld serverWorld, BlockPos pos, PlayerEntity miner, boolean firstBlockBroken) {
+        if (leafBlockState.isIn(BlockTags.LEAVES)) {
             // Set the loot context for mining the leaf block
             LootContext.Builder builder = (new LootContext.Builder(serverWorld)).random(serverWorld.random).luck(miner.getLuck()).optionalParameter(LootContextParameters.ORIGIN, new Vec3d(pos.getX(), pos.getY(), pos.getZ())).optionalParameter(LootContextParameters.TOOL, miner.getMainHandStack()).optionalParameter(LootContextParameters.THIS_ENTITY, miner);
             // Get a list of drops if the tool is used to harvest the block
@@ -64,27 +64,38 @@ public class SuperAxeItem extends AxeItem {
             listOfDroppedStacks.forEach(itemStack -> {
                 // Drop the item on the world
                 ItemScatterer.spawn(serverWorld, pos.getX(), pos.getY(), pos.getZ(), itemStack);
-                // Break the block
-                serverWorld.breakBlock(pos, false, miner);
             });
-            // Break the block if the list of drops is empty
-            if (listOfDroppedStacks.isEmpty()) serverWorld.breakBlock(pos, true, miner);
+
+            if (miner.getMainHandStack().getItem() instanceof SuperAxeItem) {
+                System.out.println("SuperAxeItem");
+                // Damage superaxe for each block that is broken
+                if (firstBlockBroken) {
+                    System.out.println("Damaging item");
+                    miner.getMainHandStack().postMine(serverWorld, serverWorld.getBlockState(pos), pos, miner);
+                    // Break the block
+                    serverWorld.breakBlock(pos, false, miner);
+                }
+            }
         }
     }
 
-    public void mineBlockWithLootContext(BlockState leafBlockState, ServerWorld serverWorld, BlockPos pos, PlayerEntity miner)
-    {
-            // Set the loot context for mining the leaf block
-            LootContext.Builder builder = (new LootContext.Builder(serverWorld)).random(serverWorld.random).luck(miner.getLuck()).optionalParameter(LootContextParameters.ORIGIN, new Vec3d(pos.getX(), pos.getY(), pos.getZ())).optionalParameter(LootContextParameters.TOOL, miner.getMainHandStack()).optionalParameter(LootContextParameters.THIS_ENTITY, miner);
-            // Get a list of drops if the tool is used to harvest the block
-            List<ItemStack> listOfDroppedStacks = leafBlockState.getDroppedStacks(builder);
-            listOfDroppedStacks.forEach(itemStack -> {
-                // Drop the item on the world
-                ItemScatterer.spawn(serverWorld, pos.getX(), pos.getY(), pos.getZ(), itemStack);
+    public void mineBlockWithLootContext(BlockState leafBlockState, ServerWorld serverWorld, BlockPos pos, PlayerEntity miner, boolean firstBlockBroken) {
+        // Set the loot context for mining the leaf block
+        LootContext.Builder builder = (new LootContext.Builder(serverWorld)).random(serverWorld.random).luck(miner.getLuck()).optionalParameter(LootContextParameters.ORIGIN, new Vec3d(pos.getX(), pos.getY(), pos.getZ())).optionalParameter(LootContextParameters.TOOL, miner.getMainHandStack()).optionalParameter(LootContextParameters.THIS_ENTITY, miner);
+        // Get a list of drops if the tool is used to harvest the block
+        List<ItemStack> listOfDroppedStacks = leafBlockState.getDroppedStacks(builder);
+        listOfDroppedStacks.forEach(itemStack -> {
+            // Drop the item on the world
+            ItemScatterer.spawn(serverWorld, pos.getX(), pos.getY(), pos.getZ(), itemStack);
+        });
+
+        if (miner.getMainHandStack().getItem() instanceof SuperAxeItem) {
+            // Damage superaxe for each block that is broken
+            if (firstBlockBroken) {
+                miner.getMainHandStack().postMine(serverWorld, serverWorld.getBlockState(pos), pos, miner);
                 // Break the block
                 serverWorld.breakBlock(pos, false, miner);
-            });
-            // Break the block if the list of drops is empty
-            if (listOfDroppedStacks.isEmpty()) serverWorld.breakBlock(pos, true, miner);
+            }
+        }
     }
 }
