@@ -225,14 +225,15 @@ public class TreeChopper {
                     // Check if the superaxe hasn't broken
                     if (miner.getMainHandStack().getDamage() > 0) {
                         // Damage superaxe for each block that is broken
-                        if (firstBlockBroken) miner.getMainHandStack().postMine(world, world.getBlockState(blockPos), blockPos, miner);
-                        else this.firstBlockBroken = true;
+                        if (!firstBlockBroken) {
+                            this.firstBlockBroken = true;
+                        }
                     }
                     BlockState logBlockState = world.getBlockState(blockPos);
                     if (logBlockState.isIn(BlockTags.LOGS)) {
                         if (!world.isClient()) {
                             // Harvest the block
-                            ((SuperAxeItem) itemStack.getItem()).mineBlockWithLootContext(logBlockState, (ServerWorld) world, blockPos, miner);
+                            ((SuperAxeItem) itemStack.getItem()).mineBlockWithLootContext(logBlockState, (ServerWorld) world, blockPos, miner, firstBlockBroken);
                         }
                     }
                 }
@@ -253,9 +254,9 @@ public class TreeChopper {
                     // Check if the superaxe hasn't broken
                     if (miner.getMainHandStack().getDamage() > 0) {
                         // Damage superaxe for each block that is broken
-                        if (firstBlockBroken)
-                            miner.getMainHandStack().postMine(world, world.getBlockState(blockPos), blockPos, miner);
-                        else this.firstBlockBroken = true;
+                        if (!firstBlockBroken) {
+                            this.firstBlockBroken = true;
+                        }
                     }
                     // Check if leaves are an instance of LeavesBlock
                     if (world.getBlockState(blockPos).isIn(BlockTags.LEAVES) && world.getBlockState(blockPos).getBlock() instanceof LeavesBlock) {
@@ -265,7 +266,7 @@ public class TreeChopper {
                             if (leafBlockState.get(LeavesBlock.DISTANCE) == 7) {
                                 // Harvest the block
                                 if (!world.isClient())
-                                    ((SuperAxeItem) itemStack.getItem()).mineLeaves(leafBlockState, (ServerWorld) world, blockPos, miner);
+                                    ((SuperAxeItem) itemStack.getItem()).mineLeaves(leafBlockState, (ServerWorld) world, blockPos, miner, firstBlockBroken);
                             }
                         } catch (IllegalArgumentException illegalArgumentException) {
                             // Don't do anything. Sometimes leaves are dropped before we harvest them

@@ -53,38 +53,50 @@ public class SuperAxeItem extends AxeItem {
         return true;
     }
 
-    public void mineLeaves(BlockState leafBlockState, ServerWorld serverWorld, BlockPos pos, PlayerEntity miner)
+    public void mineLeaves(BlockState leafBlockState, ServerWorld serverWorld, BlockPos pos, PlayerEntity miner, boolean firstBlockBroken)
     {
         if (leafBlockState.isIn(BlockTags.LEAVES))
         {
             // Set the loot context for mining the leaf block
-            LootContext.Builder builder = (new LootContext.Builder(serverWorld)).random(serverWorld.random).luck(miner.getLuck()).optionalParameter(LootContextParameters.ORIGIN, new Vec3d(pos.getX(), pos.getY(), pos.getZ())).optionalParameter(LootContextParameters.TOOL, miner.getMainHandStack()).optionalParameter(LootContextParameters.THIS_ENTITY, miner);
+            LootContext.Builder builder = (new LootContext.Builder(serverWorld)).random(serverWorld.random).luck(miner.getLuck()).optionalParameter(LootContextParameters.POSITION, pos).optionalParameter(LootContextParameters.TOOL, miner.getMainHandStack()).optionalParameter(LootContextParameters.THIS_ENTITY, miner);
             // Get a list of drops if the tool is used to harvest the block
             List<ItemStack> listOfDroppedStacks = leafBlockState.getDroppedStacks(builder);
             listOfDroppedStacks.forEach(itemStack -> {
                 // Drop the item on the world
                 ItemScatterer.spawn(serverWorld, pos.getX(), pos.getY(), pos.getZ(), itemStack);
-                // Break the block
-                serverWorld.breakBlock(pos, false, miner);
             });
-            // Break the block if the list of drops is empty
-            if (listOfDroppedStacks.isEmpty()) serverWorld.breakBlock(pos, true, miner);
+            if (miner.getMainHandStack().getItem() instanceof SuperAxeItem) {
+                System.out.println("SuperAxeItem");
+                // Damage superaxe for each block that is broken
+                if (firstBlockBroken) {
+                    System.out.println("Damaging item");
+                    miner.getMainHandStack().postMine(serverWorld, serverWorld.getBlockState(pos), pos, miner);
+                    // Break the block
+                    serverWorld.breakBlock(pos, false, miner);
+                }
+            }
         }
     }
 
-    public void mineBlockWithLootContext(BlockState leafBlockState, ServerWorld serverWorld, BlockPos pos, PlayerEntity miner)
+    public void mineBlockWithLootContext(BlockState leafBlockState, ServerWorld serverWorld, BlockPos pos, PlayerEntity miner, boolean firstBlockBroken)
     {
             // Set the loot context for mining the leaf block
-            LootContext.Builder builder = (new LootContext.Builder(serverWorld)).random(serverWorld.random).luck(miner.getLuck()).optionalParameter(LootContextParameters.ORIGIN, new Vec3d(pos.getX(), pos.getY(), pos.getZ())).optionalParameter(LootContextParameters.TOOL, miner.getMainHandStack()).optionalParameter(LootContextParameters.THIS_ENTITY, miner);
+            LootContext.Builder builder = (new LootContext.Builder(serverWorld)).random(serverWorld.random).luck(miner.getLuck()).optionalParameter(LootContextParameters.POSITION, pos).optionalParameter(LootContextParameters.TOOL, miner.getMainHandStack()).optionalParameter(LootContextParameters.THIS_ENTITY, miner);
             // Get a list of drops if the tool is used to harvest the block
             List<ItemStack> listOfDroppedStacks = leafBlockState.getDroppedStacks(builder);
             listOfDroppedStacks.forEach(itemStack -> {
                 // Drop the item on the world
                 ItemScatterer.spawn(serverWorld, pos.getX(), pos.getY(), pos.getZ(), itemStack);
+            });
+
+        if (miner.getMainHandStack().getItem() instanceof SuperAxeItem) {
+            // Damage superaxe for each block that is broken
+            if (firstBlockBroken) {
+                miner.getMainHandStack().postMine(serverWorld, serverWorld.getBlockState(pos), pos, miner);
                 // Break the block
                 serverWorld.breakBlock(pos, false, miner);
-            });
-            // Break the block if the list of drops is empty
-            if (listOfDroppedStacks.isEmpty()) serverWorld.breakBlock(pos, true, miner);
+            }
+        }
+
     }
 }
